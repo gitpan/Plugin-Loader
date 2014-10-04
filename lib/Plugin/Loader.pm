@@ -1,5 +1,5 @@
 package Plugin::Loader;
-$Plugin::Loader::VERSION = '0.02';
+$Plugin::Loader::VERSION = '0.03';
 use 5.006;
 use Moo;
 use File::Spec::Functions qw/ catfile splitdir /;
@@ -12,25 +12,27 @@ sub find_modules
 {
     my ($self, $base) = @_;
     my @baseparts     = split(/::/, $base);
-    my ($modpath, $module);
     my %modules;
 
     foreach my $directory (@INC) {
         my $path = catfile($directory, @baseparts);
         next unless -d $path;
 
-        my $rule = Path::Iterator::Rule->new;
-        $rule->perl_module;
+        my $rule = Path::Iterator::Rule->new->perl_module;
         $rule->max_depth($self->max_depth) if $self->max_depth;
+
         foreach my $file ($rule->all($path)) {
             my $modpath = $file;
 
-            $modpath =~ s!^\Q$directory\E|\.pm$!!g;
-            my @parts = splitdir($modpath);
-            shift @parts;
-            $modules{ join('::', @parts) }++;
+            $modpath =~ s!^\Q$directory\E.|\.pm$!!g;
+            my $module = join('::', splitdir($modpath));
+
+            # Using a hash means that even if a module is installed
+            # in more than one place, it will only be reported once
+            $modules{ $module }++;
         }
     }
+
     return keys(%modules);
 }
 
@@ -40,9 +42,7 @@ sub load
 
     require Module::Runtime;
     foreach my $module (@modules) {
-        if (!Module::Runtime::require_module($module)) {
-            croak "failed to load module '$module'";
-        }
+        Module::Runtime::require_module($module);
     }
 }
 
@@ -83,7 +83,7 @@ If you set this to 1, then C<find_modules> will only report modules
 that are immediately within the namespace specified.
 
 Let's say you have all of the CPAN plugins for the template toolkit
-installed locally. If you don't specify C<max_depth>, then C<find_modules>
+installed locally. If you don't specify C<max_depth>, then C<find_modules('Template::Plugin')>
 would return L<Template::Plugin::Filter::Minify::JavaScript>
 as well as L<Template::Plugin::File>. If you set C<max_depth> to 1,
 then you'd get the latter but not the former.
@@ -108,7 +108,7 @@ that were found in C<@INC>. For example:
 By default this will find all modules in the given namespace,
 unless you've specified a maximum search depth, as described above.
 
-=head2 load_module
+=head2 load
 
 Takes a module name and tries to load the module.
 If loading fails, then we C<croak>.

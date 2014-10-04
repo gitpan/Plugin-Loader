@@ -28,10 +28,11 @@ my %WriteMakefileArgs = (
   },
   "TEST_REQUIRES" => {
     "Test::More" => "0.88",
+    "lib" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.02",
+  "VERSION" => "0.03",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -45,6 +46,7 @@ my %FallbackPrereqs = (
   "Moo" => 0,
   "Path::Iterator::Rule" => 0,
   "Test::More" => "0.88",
+  "lib" => 0,
   "strict" => 0,
   "warnings" => 0
 );

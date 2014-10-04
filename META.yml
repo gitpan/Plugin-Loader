@@ -4,6 +4,7 @@ author:
   - 'Neil Bowers <neilb@cpan.org>'
 build_requires:
   Test::More: '0.88'
+  lib: '0'
   strict: '0'
   warnings: '0'
 configure_requires:
@@ -25,4 +26,4 @@ requires:
 resources:
   homepage: https://github.com/neilbowers/Plugin-Loader
   repository: https://github.com/neilbowers/Plugin-Loader.git
-version: '0.02'
+version: '0.03'
