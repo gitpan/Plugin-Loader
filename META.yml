@@ -26,4 +26,4 @@ requires:
 resources:
   homepage: https://github.com/neilbowers/Plugin-Loader
   repository: https://github.com/neilbowers/Plugin-Loader.git
-version: '0.03'
+version: '0.04'

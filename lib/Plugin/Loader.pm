@@ -1,10 +1,10 @@
 package Plugin::Loader;
-$Plugin::Loader::VERSION = '0.03';
+$Plugin::Loader::VERSION = '0.04';
 use 5.006;
 use Moo;
-use File::Spec::Functions qw/ catfile splitdir /;
 use Path::Iterator::Rule;
-use Carp qw/ croak /;
+use File::Spec::Functions   qw/ catfile splitdir /;
+use Carp                    qw/ croak /;
 
 has 'max_depth' => (is => 'rw');
 
@@ -22,9 +22,8 @@ sub find_modules
         $rule->max_depth($self->max_depth) if $self->max_depth;
 
         foreach my $file ($rule->all($path)) {
-            my $modpath = $file;
+            (my $modpath = $file) =~ s!^\Q$directory\E.|\.pm$!!g;
 
-            $modpath =~ s!^\Q$directory\E.|\.pm$!!g;
             my $module = join('::', splitdir($modpath));
 
             # Using a hash means that even if a module is installed
@@ -58,8 +57,7 @@ Plugin::Loader - finding and loading modules in a given namespace
 
  use Plugin::Loader;
 
- my $loader = Plugin::Loader->new;
-
+ my $loader  = Plugin::Loader->new;
  my @plugins = $loader->find_modules('MyApp::Plugin');
 
  foreach my $plugin (@plugins) {
@@ -118,6 +116,12 @@ If loading fails, then we C<croak>.
 L<Mojo::Loader> was the inspiration for this module, but has
 a slightly different interface. In particular, it has C<max_depth>
 hard-coded to 1.
+
+L<Module::Pluggable> is effectively a role which gives a class the ability
+to find plugins within its namespace.
+
+L<Module::Pluggable::Ordered> is similar to L<Module::Pluggable>,
+but lets you control the order in which modules are loaded.
 
 L<all> will load all modules in a given namespace, eg with C<use all 'IO::*';>
 
